@@ -15,20 +15,20 @@ except:
 st.set_page_config(page_title="AssetFlow - Rebalancing Report", layout="wide")
 st.title("Asset Rebalancing Simulation")
 
-# Asset input
-st.header("1. Asset Composition Input")
-default_data = {
-    "Asset Type": ["Cash", "Savings", "KR_Stock", "ETF", "Crypto", "Other"],
-    "Amount (KRW10K)": [1000, 3000, 7000, 4000, 2000, 500],
-}
-df_input = pd.DataFrame(default_data)
-edited_df = st.data_editor(df_input, num_rows="dynamic")
+# Asset input (숨김 처리된 입력 창)
+with st.expander("📝 Click to input or edit your asset data", expanded=False):
+    default_data = {
+        "Asset Type": ["Cash", "Savings", "KR_Stock", "ETF", "Crypto", "Other"],
+        "Amount (KRW10K)": [1000, 3000, 7000, 4000, 2000, 500],
+    }
+    df_input = pd.DataFrame(default_data)
+    edited_df = st.data_editor(df_input, num_rows="dynamic")
 
 # Calculate total and add portion column
 total = edited_df["Amount (KRW10K)"].sum()
 edited_df["Portion (%)"] = round((edited_df["Amount (KRW10K)"] / total) * 100, 1)
 
-# Show total-added summary table
+# Show total-added summary table only
 total_row = pd.DataFrame([{
     "Asset Type": "TOTAL",
     "Amount (KRW10K)": total,
@@ -36,7 +36,7 @@ total_row = pd.DataFrame([{
 }])
 df_display = pd.concat([edited_df, total_row], ignore_index=True)
 
-st.markdown("#### Summary with Total")
+st.header("1. Summary with Total")
 st.dataframe(df_display)
 
 # Pie chart
