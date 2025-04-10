@@ -4,8 +4,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+import matplotlib.font_manager as fm
 
-plt.rcParams['font.family'] = 'DejaVu Sans'
+# 한글 폰트 설정 시도: 맑은고딕 (Windows), Fallback은 기본 폰트
+try:
+    plt.rcParams['font.family'] = 'Malgun Gothic'
+except:
+    plt.rcParams['font.family'] = 'DejaVu Sans'
 
 st.set_page_config(page_title="AssetFlow - Rebalancing Report", layout="wide")
 st.title("Asset Rebalancing Simulation")
@@ -19,15 +24,22 @@ default_data = {
 df_input = pd.DataFrame(default_data)
 edited_df = st.data_editor(df_input, num_rows="dynamic")
 
-# Add total row
+# Calculate total and add portion column
 total = edited_df["Amount (KRW10K)"].sum()
 edited_df["Portion (%)"] = round((edited_df["Amount (KRW10K)"] / total) * 100, 1)
-total_row = pd.DataFrame([{"Asset Type": "Total", "Amount (KRW10K)": total, "Portion (%)": edited_df["Portion (%)"].sum()}])
+
+# Display with total row
+total_row = pd.DataFrame([{
+    "Asset Type": "TOTAL",
+    "Amount (KRW10K)": total,
+    "Portion (%)": edited_df["Portion (%)"].sum()
+}])
 df_display = pd.concat([edited_df, total_row], ignore_index=True)
+st.dataframe(df_display)
 
 # Pie chart
 st.header("2. Asset Composition Visualization")
-filtered_df = edited_df[edited_df["Asset Type"] != "Total"]
+filtered_df = edited_df.copy()
 fig, ax = plt.subplots()
 ax.pie(filtered_df["Amount (KRW10K)"], labels=filtered_df["Asset Type"], autopct='%1.1f%%', startangle=90)
 ax.axis('equal')
