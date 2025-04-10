@@ -6,11 +6,10 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 import matplotlib.font_manager as fm
 
-# 한글 폰트 설정
-try:
-    plt.rcParams['font.family'] = 'Malgun Gothic'
-except:
-    plt.rcParams['font.family'] = 'DejaVu Sans'
+# NanumGothic 폰트 직접 로드
+font_path = "NanumGothic.ttf"
+font_name = fm.FontProperties(fname=font_path).get_name()
+plt.rcParams['font.family'] = font_name
 
 st.set_page_config(page_title="자산통 - 리밸런싱 리포트", layout="wide")
 st.title("📊 자산 리밸런싱 시뮬레이션")
