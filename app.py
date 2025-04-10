@@ -4,27 +4,33 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+import matplotlib.font_manager as fm
+
+plt.rcParams['font.family'] = 'NanumGothic'
 
 st.set_page_config(page_title="AssetFlow - 자산 리밸런싱 리포트", layout="wide")
-
 st.title("자산 리밸런싱 시뮬레이션")
 
 # 자산 입력
 st.header("1. 자산 구성 입력")
 default_data = {
-    "자산유형": ["현금", "예금/적금", "국내주식", "해외ETF", "코인"],
-    "금액(만원)": [1000, 3000, 7000, 4000, 2000],
+    "자산유형": ["현금", "예금/적금", "국내주식", "해외ETF", "코인", "기타"],
+    "금액(만원)": [1000, 3000, 7000, 4000, 2000, 500],
 }
 df_input = pd.DataFrame(default_data)
 edited_df = st.data_editor(df_input, num_rows="dynamic")
 
+# 합계 행 추가
+total = edited_df["금액(만원)"].sum()
+edited_df["비중(%)"] = round((edited_df["금액(만원)"] / total) * 100, 1)
+total_row = pd.DataFrame([{"자산유형": "합계", "금액(만원)": total, "비중(%)": edited_df["비중(%)"].sum()}])
+df_display = pd.concat([edited_df, total_row], ignore_index=True)
+
 # 자산 시각화
 st.header("2. 자산 구성 시각화")
-total_assets = edited_df["금액(만원)"].sum()
-edited_df["비중(%)"] = round((edited_df["금액(만원)"] / total_assets) * 100, 1)
-
+filtered_df = edited_df[edited_df["자산유형"] != "합계"]
 fig, ax = plt.subplots()
-ax.pie(edited_df["금액(만원)"], labels=edited_df["자산유형"], autopct='%1.1f%%', startangle=90)
+ax.pie(filtered_df["금액(만원)"], labels=filtered_df["자산유형"], autopct='%1.1f%%', startangle=90)
 ax.axis('equal')
 st.pyplot(fig)
 
@@ -42,7 +48,7 @@ selected_model = model_dict[model_option]
 
 # 리밸런싱 시뮬레이션
 st.header("4. 리밸런싱 시뮬레이션 결과")
-user_assets = dict(zip(edited_df["자산유형"], edited_df["금액(만원)"]))
+user_assets = dict(zip(filtered_df["자산유형"], filtered_df["금액(만원)"]))
 total_user_assets = sum(user_assets.values())
 user_percent = {k: round(v / total_user_assets * 100, 1) for k, v in user_assets.items()}
 
