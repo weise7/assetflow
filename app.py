@@ -28,10 +28,22 @@ edited_df = st.data_editor(df_input, num_rows="dynamic")
 total = edited_df["Amount (KRW10K)"].sum()
 edited_df["Portion (%)"] = round((edited_df["Amount (KRW10K)"] / total) * 100, 1)
 
+# Show total-added summary table
+total_row = pd.DataFrame([{
+    "Asset Type": "TOTAL",
+    "Amount (KRW10K)": total,
+    "Portion (%)": edited_df["Portion (%)"].sum()
+}])
+df_display = pd.concat([edited_df, total_row], ignore_index=True)
+
+st.markdown("#### Summary with Total")
+st.dataframe(df_display)
+
 # Pie chart
 st.header("2. Asset Composition Visualization")
+filtered_df = edited_df.copy()
 fig, ax = plt.subplots()
-ax.pie(edited_df["Amount (KRW10K)"], labels=edited_df["Asset Type"], autopct='%1.1f%%', startangle=90)
+ax.pie(filtered_df["Amount (KRW10K)"], labels=filtered_df["Asset Type"], autopct='%1.1f%%', startangle=90)
 ax.axis('equal')
 st.pyplot(fig)
 
