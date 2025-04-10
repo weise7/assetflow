@@ -28,20 +28,10 @@ edited_df = st.data_editor(df_input, num_rows="dynamic")
 total = edited_df["Amount (KRW10K)"].sum()
 edited_df["Portion (%)"] = round((edited_df["Amount (KRW10K)"] / total) * 100, 1)
 
-# Display with total row
-total_row = pd.DataFrame([{
-    "Asset Type": "TOTAL",
-    "Amount (KRW10K)": total,
-    "Portion (%)": edited_df["Portion (%)"].sum()
-}])
-df_display = pd.concat([edited_df, total_row], ignore_index=True)
-st.dataframe(df_display)
-
 # Pie chart
 st.header("2. Asset Composition Visualization")
-filtered_df = edited_df.copy()
 fig, ax = plt.subplots()
-ax.pie(filtered_df["Amount (KRW10K)"], labels=filtered_df["Asset Type"], autopct='%1.1f%%', startangle=90)
+ax.pie(edited_df["Amount (KRW10K)"], labels=edited_df["Asset Type"], autopct='%1.1f%%', startangle=90)
 ax.axis('equal')
 st.pyplot(fig)
 
@@ -59,7 +49,7 @@ selected_model = model_dict[model_option]
 
 # Rebalancing simulation
 st.header("4. Rebalancing Simulation Result")
-user_assets = dict(zip(filtered_df["Asset Type"], filtered_df["Amount (KRW10K)"]))
+user_assets = dict(zip(edited_df["Asset Type"], edited_df["Amount (KRW10K)"]))
 total_user_assets = sum(user_assets.values())
 user_percent = {k: round(v / total_user_assets * 100, 1) for k, v in user_assets.items()}
 
